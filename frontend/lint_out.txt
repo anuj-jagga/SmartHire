@@ -1,0 +1,16 @@
+
+C:\Users\jagga\OneDrive\Desktop\SmartHire\frontend\src\components\dashboards\AdminDashboard.jsx
+  47:13  error  Error: This value cannot be modified
+
+Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
+
+  45 |     const handleRoleChange = async (userId, newRole) => {
+  46 |         try {
+> 47 |             axios.defaults.headers.common['Authorization'] = `Bearer ${useAuthStore.getState().token}`;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ value cannot be modified
+  48 |             await axios.put(`/api/auth/users/${userId}/role`, { role: newRole });
+  49 |
+  50 |             // Re-fetch users or update local state  react-hooks/immutability
+
+✖ 1 problem (1 error, 0 warnings)
+
