@@ -3,6 +3,12 @@ const authService = require('../services/authService');
 const registerUser = async (req, res) => {
     try {
         const result = await authService.registerUser(req.body);
+        res.cookie('token', result.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
         res.status(201).json(result);
     } catch (error) {
         if (error.message === 'User already exists') {
@@ -16,6 +22,12 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
         const result = await authService.loginUser(email, password);
+        res.cookie('token', result.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
         res.json(result);
     } catch (error) {
         if (error.message === 'Invalid email or password') {
@@ -72,11 +84,20 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const logoutUser = (req, res) => {
+    res.cookie('token', '', {
+        httpOnly: true,
+        expires: new Date(0)
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getUserProfile,
     getAllUsers,
     updateUserRole,
-    deleteUser
+    deleteUser,
+    logoutUser
 };

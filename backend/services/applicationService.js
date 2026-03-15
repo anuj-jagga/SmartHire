@@ -1,5 +1,6 @@
 const Application = require('../models/Application');
 const Job = require('../models/Job');
+const Analytics = require('../models/Analytics');
 const { emailQueue } = require('../config/queue');
 const crypto = require('crypto');
 
@@ -39,7 +40,18 @@ const applyForJob = async (jobId, resumeUrl, userId) => {
         aiFeedback
     });
 
-    return await application.save();
+    const savedApp = await application.save();
+
+    // Log Analytics
+    await Analytics.create({
+        event: 'APPLICATION_SUBMITTED',
+        user: userId,
+        candidate: userId,
+        job: jobId,
+        application: savedApp._id
+    });
+
+    return savedApp;
 };
 
 const getApplications = async (userRole, userId, page = 1, limit = 10) => {
@@ -182,6 +194,15 @@ const updateApplicationStatus = async (appId, updateData) => {
         }
     }
 
+    // Log Analytics
+    await Analytics.create({
+        event: 'APPLICATION_STATUS_UPDATED',
+        application: appId,
+        candidate: populatedApp.candidate._id,
+        job: populatedApp.job,
+        metadata: { oldStatus: application.status, newStatus: status }
+    });
+
     return application.toObject();
 };
 
@@ -197,6 +218,16 @@ const withdrawApplication = async (appId, userId) => {
     }
 
     await Application.deleteOne({ _id: appId });
+
+    // Log Analytics
+    await Analytics.create({
+        event: 'APPLICATION_WITHDRAWN',
+        user: userId,
+        candidate: userId,
+        application: appId,
+        job: application.job
+    });
+
     return { message: 'Application withdrawn successfully' };
 };
 

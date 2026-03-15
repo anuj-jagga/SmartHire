@@ -22,6 +22,9 @@ const WebRTCInterview = () => {
     const userVideo = useRef();
     const peersRef = useRef({});
     const cameraTrackRef = useRef(null);
+    const localStreamRef = useRef(null);
+    const screenStreamRef = useRef(null);
+    const tracksRegistryRef = useRef([]); // To track EVERY single MediaStreamTrack created
     const containerRef = useRef(null);
 
     const [roomValidating, setRoomValidating] = useState(true);
@@ -36,7 +39,6 @@ const WebRTCInterview = () => {
 
         const validateRoom = async () => {
             try {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${useAuthStore.getState().token}`;
                 const res = await axios.get(`/api/applications/room/${roomId}`);
                 const app = res.data;
 
@@ -68,7 +70,13 @@ const WebRTCInterview = () => {
         const pc = new RTCPeerConnection({
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:global.stun.twilio.com:3478' }
+                { urls: 'stun:global.stun.twilio.com:3478' },
+                // Production TURN servers (placeholders)
+                // { 
+                //     urls: 'turn:your-turn-server.com:3478', 
+                //     username: 'user', 
+                //     credential: 'password' 
+                // }
             ]
         });
 
@@ -98,8 +106,22 @@ const WebRTCInterview = () => {
         const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         socketRef.current = io(serverUrl);
 
+        let isMounted = true;
+
         navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((currentStream) => {
+            if (!isMounted) {
+                currentStream.getTracks().forEach(track => track.stop());
+                return;
+            }
+            
+            // Register tracks for nuclear cleanup
+            currentStream.getTracks().forEach(track => {
+                tracksRegistryRef.current.push(track);
+                console.log(`Registered local track: ${track.kind}`);
+            });
+
             setStream(currentStream);
+            localStreamRef.current = currentStream;
             cameraTrackRef.current = currentStream.getVideoTracks()[0];
             if (userVideo.current) {
                 userVideo.current.srcObject = currentStream;
@@ -168,17 +190,73 @@ const WebRTCInterview = () => {
             alert("Could not access camera/microphone. Please check permissions.");
         });
 
+        // Listen for browser close/refresh
+        window.addEventListener('beforeunload', destroyInterview);
+
         return () => {
-            if (stream) stream.getTracks().forEach(track => track.stop());
-            if (socketRef.current) socketRef.current.disconnect();
-            Object.values(peersRef.current).forEach(pc => pc.close());
+            isMounted = false;
+            window.removeEventListener('beforeunload', destroyInterview);
+            destroyInterview();
         };
     }, [roomId, roomValidating, roomError, user]);
+
+    const destroyInterview = () => {
+        console.log("NUCLEAR CLEANUP STARTING...");
+        
+        // 1. Terminate all socket activity
+        if (socketRef.current) {
+            socketRef.current.disconnect();
+            socketRef.current = null;
+        }
+
+        // 2. Stop EVERY track in the registry
+        tracksRegistryRef.current.forEach(track => {
+            try {
+                track.stop();
+                track.enabled = false;
+                console.log(`Successfully stopped registry track: ${track.kind}`);
+            } catch (e) {
+                console.warn("Error stopping track during nuclear cleanup", e);
+            }
+        });
+        tracksRegistryRef.current = [];
+
+        // 3. Close all peer connections
+        Object.values(peersRef.current).forEach(pc => {
+            try {
+                pc.getSenders().forEach(sender => pc.removeTrack(sender));
+                pc.close();
+            } catch (e) {}
+        });
+        peersRef.current = {};
+
+        // 4. Force detach video elements
+        if (userVideo.current) userVideo.current.srcObject = null;
+
+        // 5. Cleanup streams if they still exist
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(t => t.stop());
+            localStreamRef.current = null;
+        }
+        if (screenStreamRef.current) {
+            screenStreamRef.current.getTracks().forEach(t => t.stop());
+            screenStreamRef.current = null;
+        }
+        
+        console.log("NUCLEAR CLEANUP COMPLETE.");
+    };
 
     const toggleScreenShare = async () => {
         if (!isScreenSharing) {
             try {
                 const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                screenStreamRef.current = screenStream;
+                
+                screenStream.getTracks().forEach(track => {
+                    tracksRegistryRef.current.push(track);
+                    console.log(`Registered screen track: ${track.kind}`);
+                });
+
                 const screenTrack = screenStream.getVideoTracks()[0];
 
                 if (userVideo.current) {
@@ -205,10 +283,22 @@ const WebRTCInterview = () => {
         }
     };
 
+    const stopMediaTracks = () => {
+        destroyInterview();
+    };
+
     const stopScreenShare = () => {
+        if (screenStreamRef.current) {
+            screenStreamRef.current.getTracks().forEach(track => {
+                track.stop();
+                track.enabled = false;
+            });
+            screenStreamRef.current = null;
+        }
+        
         if (cameraTrackRef.current) {
             if (userVideo.current) {
-                userVideo.current.srcObject = stream;
+                userVideo.current.srcObject = localStreamRef.current;
             }
 
             Object.values(peersRef.current).forEach(pc => {
@@ -243,7 +333,10 @@ const WebRTCInterview = () => {
         }
     };
 
-    const handleLeave = () => navigate('/dashboard');
+    const handleLeave = () => {
+        destroyInterview();
+        navigate('/dashboard');
+    };
 
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
@@ -311,14 +404,31 @@ const WebRTCInterview = () => {
                 zIndex: 10,
                 borderRadius: '1rem'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ width: '2rem', height: '2rem', borderRadius: '0.5rem', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <ScreenShare size={16} color="white" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.6rem', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)' }}>
+                            <ScreenShare size={18} color="white" />
+                        </div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0, letterSpacing: '-0.02em', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SmartHire</h2>
                     </div>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0, letterSpacing: '-0.02em' }}>SmartHire Interview</h2>
-                    <span style={{ padding: '0.25rem 0.75rem', backgroundColor: 'rgba(124, 58, 237, 0.15)', color: '#c084fc', border: '1px solid rgba(124, 58, 237, 0.3)', borderRadius: '2rem', fontSize: '0.75rem', fontWeight: '600' }}>
-                        {roomData?.job?.title || 'Native WebRTC'}
-                    </span>
+                    
+                    <div style={{ width: '1px', height: '1.5rem', background: 'rgba(255,255,255,0.1)' }}></div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Position:</span>
+                        <span style={{ 
+                            padding: '0.35rem 0.85rem', 
+                            backgroundColor: 'rgba(124, 58, 237, 0.12)', 
+                            color: '#c084fc', 
+                            border: '1px solid rgba(124, 58, 237, 0.25)', 
+                            borderRadius: '0.75rem', 
+                            fontSize: '0.85rem', 
+                            fontWeight: '600',
+                            boxShadow: 'inset 0 0 10px rgba(124, 58, 237, 0.05)'
+                        }}>
+                            {roomData?.job?.title || 'General Interview Session'}
+                        </span>
+                    </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500' }}>
                     <Users size={18} /> 

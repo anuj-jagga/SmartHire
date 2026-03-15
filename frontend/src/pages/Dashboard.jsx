@@ -37,6 +37,7 @@ const Dashboard = () => {
     const [adminUserRole, setAdminUserRole] = useState('');
     const [adminUserPage, setAdminUserPage] = useState(1);
     const [adminUserTotalPages, setAdminUserTotalPages] = useState(1);
+    const [analyticsEvents, setAnalyticsEvents] = useState([]);
 
     useEffect(() => {
         if (!user) {
@@ -95,6 +96,9 @@ const Dashboard = () => {
                         if (usersRes.data.totalPages) {
                             setAdminUserTotalPages(usersRes.data.totalPages);
                         }
+
+                        const analyticsRes = await axios.get('/api/admin/analytics');
+                        setAnalyticsEvents(analyticsRes.data);
                     } catch (e) {
                         console.error('Failed fetching admin stats', e);
                     }
@@ -161,6 +165,7 @@ const Dashboard = () => {
                     adminUserPage={adminUserPage}
                     setAdminUserPage={setAdminUserPage}
                     adminUserTotalPages={adminUserTotalPages}
+                    analyticsEvents={analyticsEvents}
                 />
             )}
         </div>

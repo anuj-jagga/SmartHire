@@ -8,7 +8,13 @@ const useAuthStore = create((set) => ({
         localStorage.setItem('token', token);
         set({ user: userData, token });
     },
-    logout: () => {
+    logout: async () => {
+        try {
+            const axios = (await import('axios')).default;
+            await axios.post('/api/auth/logout');
+        } catch (err) {
+            console.error("Logout failed on server", err);
+        }
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         set({ user: null, token: null });

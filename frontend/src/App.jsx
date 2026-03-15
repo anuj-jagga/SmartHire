@@ -15,13 +15,12 @@ function App() {
   const { user, token } = useAuthStore();
 
   useEffect(() => {
-    // Globally configure Axios so we don't have to keep setting it locally in random pages
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-    }
-  }, [token]);
+    // Globally configure Axios for cookie-based auth
+    axios.defaults.withCredentials = true;
+    
+    // We still keep the token in state for legacy support if needed, 
+    // but the browser will handle the HTTP-only cookie automatically.
+  }, []);
 
   return (
     <Router>

@@ -15,7 +15,8 @@ const AdminDashboard = ({
     setAdminUserRole,
     adminUserPage,
     setAdminUserPage,
-    adminUserTotalPages
+    adminUserTotalPages,
+    analyticsEvents = []
 }) => {
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // type: success | error
@@ -138,6 +139,82 @@ const AdminDashboard = ({
                                 <p style={{ color: '#94a3b8', letterSpacing: '0.05em', fontSize: '0.875rem', textTransform: 'uppercase', fontWeight: 600, margin: 0 }}>Selected Placements</p>
                             </div>
                             <h3 className="font-extrabold" style={{ fontSize: '3rem', color: '#ffffff', position: 'relative', zIndex: 1, margin: 0 }}>{adminStats.selectedCount}</h3>
+                        </div>
+                    </div>
+
+                    {/* Live Pipeline Activity Feed */}
+                    <div style={{ padding: '2rem', border: '1px solid rgba(255, 255, 255, 0.05)', background: 'rgba(15, 23, 42, 0.5)', borderRadius: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+                        <h3 className="font-bold flex items-center gap-3" style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>
+                            <div className="rounded-full" style={{ background: 'var(--accent-gradient)', width: '8px', height: '32px' }}></div>
+                            Live Pipeline Activity
+                        </h3>
+                        <div className="glass-panel" style={{ maxHeight: '400px', overflowY: 'auto', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)', padding: '0.5rem' }}>
+                            {analyticsEvents.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                                    <AlertCircle size={40} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                                    <p>No recent activity detected.</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                    {analyticsEvents.map((event, idx) => {
+                                        let icon = <AlertCircle size={16} />;
+                                        let iconColor = '#94a3b8';
+                                        let bgColor = 'rgba(148, 163, 184, 0.1)';
+                                        
+                                        if (event.event === 'APPLICATION_SUBMITTED') {
+                                            icon = <Briefcase size={16} />;
+                                            iconColor = '#60a5fa';
+                                            bgColor = 'rgba(59, 130, 246, 0.1)';
+                                        } else if (event.event === 'APPLICATION_STATUS_UPDATED') {
+                                            icon = <CheckCircle size={16} />;
+                                            iconColor = '#34d399';
+                                            bgColor = 'rgba(16, 185, 129, 0.1)';
+                                        } else if (event.event === 'USER_REGISTERED') {
+                                            icon = <Users size={16} />;
+                                            iconColor = '#a78bfa';
+                                            bgColor = 'rgba(139, 92, 246, 0.1)';
+                                        } else if (event.event === 'USER_LOGIN') {
+                                            icon = <Award size={16} />;
+                                            iconColor = '#fbbf24';
+                                            bgColor = 'rgba(251, 191, 36, 0.1)';
+                                        }
+
+                                        return (
+                                            <div key={idx} style={{ 
+                                                display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', 
+                                                borderBottom: idx === analyticsEvents.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)',
+                                                transition: 'all 0.2s ease',
+                                                borderRadius: '0.5rem'
+                                            }} className="hover:bg-white/5">
+                                                <div style={{ 
+                                                    width: '2.5rem', height: '2.5rem', borderRadius: '0.75rem', 
+                                                    backgroundColor: bgColor, color: iconColor,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {icon}
+                                                </div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', color: '#f1f5f9' }}>
+                                                                {event.user?.name || 'System'} <span style={{ fontWeight: 400, color: '#94a3b8' }}>{event.details || event.event.replace(/_/g, ' ').toLowerCase()}</span>
+                                                            </p>
+                                                        </div>
+                                                        <span style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
+                                                            {new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </div>
+                                                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        {event.candidate && <span>Candidate: <strong>{event.candidate.name}</strong></span>}
+                                                        {event.job && <span> • Job: <strong>{event.job.title}</strong></span>}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </div>
 

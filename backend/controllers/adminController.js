@@ -9,6 +9,16 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+const getAnalytics = async (req, res) => {
+    try {
+        const analytics = await adminService.getAnalytics(parseInt(req.query.limit) || 50);
+        res.json(analytics);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error fetching analytics', error: error.message });
+    }
+};
+
 module.exports = {
-    getDashboardStats
+    getDashboardStats,
+    getAnalytics
 };

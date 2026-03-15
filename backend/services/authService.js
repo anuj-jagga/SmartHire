@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const Analytics = require('../models/Analytics');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -10,25 +11,43 @@ const registerUser = async (userData) => {
     let user = await User.findOne({ email });
     if (user) throw new Error('User already exists');
     user = await User.create({ name, email, password, role, skills, resume });
-    return {
+    const result = {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
         token: generateToken(user._id)
     };
+
+    // Log Analytics
+    await Analytics.create({
+        event: 'USER_REGISTERED',
+        user: user._id,
+        metadata: { role: user.role }
+    });
+
+    return result;
 };
 
 const loginUser = async (email, password) => {
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
-        return {
+        const result = {
             _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
             token: generateToken(user._id)
         };
+
+        // Log Analytics
+        await Analytics.create({
+            event: 'USER_LOGIN',
+            user: user._id,
+            metadata: { role: user.role }
+        });
+
+        return result;
     }
     throw new Error('Invalid email or password');
 };

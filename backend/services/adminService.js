@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
+const Analytics = require('../models/Analytics');
 
 const getDashboardStats = async () => {
     // 1. Total counts
@@ -81,6 +82,16 @@ const getDashboardStats = async () => {
     };
 };
 
+const getAnalytics = async (limit = 50) => {
+    return await Analytics.find()
+        .sort({ timestamp: -1 })
+        .populate('user', 'name email role')
+        .populate('candidate', 'name email')
+        .populate('job', 'title')
+        .limit(limit);
+};
+
 module.exports = {
-    getDashboardStats
+    getDashboardStats,
+    getAnalytics
 };

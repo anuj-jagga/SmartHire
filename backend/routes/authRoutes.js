@@ -12,6 +12,10 @@ router.post('/register', validateRegister, authController.registerUser);
 // @route   POST /api/auth/login
 router.post('/login', validateLogin, authController.loginUser);
 
+// @desc    Logout user
+// @route   POST /api/auth/logout
+router.post('/logout', authController.logoutUser);
+
 // @desc    Get user profile
 // @route   GET /api/auth/profile
 router.get('/profile', protect, authController.getUserProfile);

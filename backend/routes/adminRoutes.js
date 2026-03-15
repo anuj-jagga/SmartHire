@@ -8,5 +8,6 @@ const router = express.Router();
 // @route   GET /api/admin/stats
 // @access  Private/Admin
 router.get('/stats', protect, onlyAdmin, adminController.getDashboardStats);
+router.get('/analytics', protect, onlyAdmin, adminController.getAnalytics);
 
 module.exports = router;
