@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import useAuthStore from '../store/authStore';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Users, ScreenShare, ScreenShareOff, Maximize, Minimize, ChevronLeft } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Users, ScreenShare, ScreenShareOff, Maximize, Minimize } from 'lucide-react';
 import axios from 'axios';
 
 const WebRTCInterview = () => {
@@ -30,10 +30,6 @@ const WebRTCInterview = () => {
     const [roomValidating, setRoomValidating] = useState(true);
     const [roomError, setRoomError] = useState(null);
     const [roomData, setRoomData] = useState(null);
-
-    const [pipPosition, setPipPosition] = useState({ x: window.innerWidth - 340, y: window.innerHeight - 300 });
-    const [isDragging, setIsDragging] = useState(false);
-    const dragOffset = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
         if (!user) {
@@ -75,6 +71,12 @@ const WebRTCInterview = () => {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:global.stun.twilio.com:3478' },
+                // Production TURN servers (placeholders)
+                // { 
+                //     urls: 'turn:your-turn-server.com:3478', 
+                //     username: 'user', 
+                //     credential: 'password' 
+                // }
             ]
         });
 
@@ -281,6 +283,10 @@ const WebRTCInterview = () => {
         }
     };
 
+    const stopMediaTracks = () => {
+        destroyInterview();
+    };
+
     const stopScreenShare = () => {
         if (screenStreamRef.current) {
             screenStreamRef.current.getTracks().forEach(track => {
@@ -369,34 +375,6 @@ const WebRTCInterview = () => {
         };
     }, []);
 
-    const handleMouseDown = (e) => {
-        if (peers.length === 0) return;
-        setIsDragging(true);
-        dragOffset.current = {
-            x: e.clientX - pipPosition.x,
-            y: e.clientY - pipPosition.y
-        };
-    };
-
-    useEffect(() => {
-        const handleMouseMove = (e) => {
-            if (!isDragging) return;
-            const x = Math.max(20, Math.min(e.clientX - dragOffset.current.x, window.innerWidth - 300));
-            const y = Math.max(20, Math.min(e.clientY - dragOffset.current.y, window.innerHeight - 180));
-            setPipPosition({ x, y });
-        };
-        const handleMouseUp = () => setIsDragging(false);
-
-        if (isDragging) {
-            window.addEventListener('mousemove', handleMouseMove);
-            window.addEventListener('mouseup', handleMouseUp);
-        }
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [isDragging]);
-
     if (roomValidating) {
         return <div style={{ height: '100vh', backgroundColor: '#0a0a0f', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.2rem', fontWeight: 'bold' }}>Validating Room Access...</div>;
     }
@@ -418,118 +396,43 @@ const WebRTCInterview = () => {
             <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '40%', height: '40%', background: 'var(--accent-secondary)', filter: 'blur(150px)', opacity: '0.05', borderRadius: '50%', pointerEvents: 'none', zIndex: 0 }}></div>
 
             <header className="glass-panel" style={{ 
-                margin: isFullscreen ? '0' : '0 0 1.5rem 0', 
-                padding: '0.6rem 2rem', 
+                margin: isFullscreen ? '0' : '1.5rem 1.5rem 0 1.5rem', 
+                padding: '1rem 2rem', 
                 display: isFullscreen ? 'none' : 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center',
                 zIndex: 10,
-                borderRadius: '0 0 1.25rem 1.25rem',
-                borderTop: 'none',
-                background: 'rgba(15, 23, 42, 0.7)',
-                backdropFilter: 'blur(20px) saturate(180%)',
-                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+                borderRadius: '1rem'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                    <button 
-                        onClick={() => navigate('/dashboard')}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.4rem',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '0.8rem',
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.05)',
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem',
-                            fontWeight: '600',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            letterSpacing: '0.01em'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.color = '#fff';
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                            e.currentTarget.style.transform = 'translateX(-2px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.transform = 'translateX(0)';
-                        }}
-                    >
-                        <ChevronLeft size={16} />
-                        Dashboard
-                    </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.6rem', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)' }}>
+                            <ScreenShare size={18} color="white" />
+                        </div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0, letterSpacing: '-0.02em', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SmartHire</h2>
+                    </div>
                     
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <div style={{ 
-                                width: '2.4rem', 
-                                height: '2.4rem', 
-                                borderRadius: '0.7rem', 
-                                background: 'var(--accent-gradient)', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                boxShadow: '0 4px 15px rgba(124, 58, 237, 0.4)' 
-                            }}>
-                                <ScreenShare size={20} color="white" />
-                            </div>
-                            <h2 style={{ 
-                                fontSize: '1.4rem', 
-                                fontWeight: '800', 
-                                margin: 0, 
-                                letterSpacing: '-0.03em', 
-                                color: 'white',
-                                display: 'flex',
-                                alignItems: 'center'
-                            }}>SmartHire</h2>
-                        </div>
-                        
-                        <div style={{ width: '1px', height: '1.5rem', background: 'rgba(255,255,255,0.08)' }}></div>
-                        
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <span style={{ 
-                                padding: '0.4rem 0.9rem', 
-                                backgroundColor: 'rgba(255, 255, 255, 0.03)', 
-                                color: 'rgba(255, 255, 255, 0.8)', 
-                                border: '1px solid rgba(255, 255, 255, 0.08)', 
-                                borderRadius: '0.8rem', 
-                                fontSize: '0.85rem', 
-                                fontWeight: '600',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                            }}>
-                                <span style={{ color: 'rgba(255, 255, 255, 0.4)', fontWeight: '500', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Position:</span>
-                                {roomData?.job?.title || 'General Interview'}
-                            </span>
-                        </div>
+                    <div style={{ width: '1px', height: '1.5rem', background: 'rgba(255,255,255,0.1)' }}></div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Position:</span>
+                        <span style={{ 
+                            padding: '0.35rem 0.85rem', 
+                            backgroundColor: 'rgba(124, 58, 237, 0.12)', 
+                            color: '#c084fc', 
+                            border: '1px solid rgba(124, 58, 237, 0.25)', 
+                            borderRadius: '0.75rem', 
+                            fontSize: '0.85rem', 
+                            fontWeight: '600',
+                            boxShadow: 'inset 0 0 10px rgba(124, 58, 237, 0.05)'
+                        }}>
+                            {roomData?.job?.title || 'General Interview Session'}
+                        </span>
                     </div>
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                    <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '0.5rem', 
-                        padding: '0.4rem 0.8rem', 
-                        borderRadius: '0.6rem',
-                        background: 'rgba(16, 185, 129, 0.05)',
-                        border: '1px solid rgba(16, 185, 129, 0.1)',
-                    }}>
-                        <div className="pulse-dot" style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
-                        <span style={{ color: '#10b981', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live</span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem', fontWeight: '500' }}>
-                        <Users size={18} /> 
-                        <span>{peers.filter(p => p.stream !== undefined).length + 1} Participant{peers.filter(p => p.stream !== undefined).length + 1 !== 1 ? 's' : ''}</span>
-                    </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500' }}>
+                    <Users size={18} /> 
+                    <span>{peers.filter(p => p.stream !== undefined).length + 1} Participant{peers.filter(p => p.stream !== undefined).length + 1 !== 1 ? 's' : ''}</span>
                 </div>
             </header>
 
@@ -540,29 +443,23 @@ const WebRTCInterview = () => {
                 }}>
 
                     {/* Local User Video (PIP or Main) */}
-                    <div 
-                        onMouseDown={handleMouseDown}
-                        className={peers.length > 0 || !isFullscreen ? "glass-panel" : ""} 
-                        style={{
-                            position: peers.length > 0 ? 'fixed' : 'relative',
-                            left: peers.length > 0 ? `${pipPosition.x}px` : 'auto',
-                            top: peers.length > 0 ? `${pipPosition.y}px` : 'auto',
-                            width: peers.length > 0 ? '280px' : 'auto',
-                            height: peers.length > 0 ? '157px' : '100%',
-                            maxWidth: peers.length > 0 ? '280px' : '100%',
-                            maxHeight: peers.length > 0 ? '157px' : (isFullscreen ? '100vh' : 'calc(100vh - 220px)'),
-                            aspectRatio: peers.length > 0 ? '16/9' : '16/9',
-                            borderRadius: (peers.length > 0 || !isFullscreen) ? '1.25rem' : '0',
-                            overflow: 'hidden', 
-                            backgroundColor: '#000',
-                            border: (peers.length > 0 || !isFullscreen) ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                            zIndex: 1000, 
-                            cursor: peers.length > 0 ? (isDragging ? 'grabbing' : 'grab') : 'default',
-                            transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: (peers.length > 0 || !isFullscreen) ? '0 25px 50px rgba(0,0,0,0.6)' : 'none',
-                            userSelect: 'none'
-                        }}
-                    >
+                    <div className={peers.length > 0 || !isFullscreen ? "glass-panel" : ""} style={{
+                        position: peers.length > 0 ? 'absolute' : 'relative',
+                        bottom: peers.length > 0 ? (isFullscreen ? '7rem' : '2.5rem') : 'auto',
+                        right: peers.length > 0 ? '2.5rem' : 'auto',
+                        width: peers.length > 0 ? '300px' : 'auto',
+                        height: peers.length > 0 ? '200px' : '100%',
+                        maxWidth: peers.length > 0 ? '300px' : '100%',
+                        maxHeight: peers.length > 0 ? '200px' : (isFullscreen ? '100vh' : 'calc(100vh - 220px)'),
+                        aspectRatio: peers.length > 0 ? 'auto' : '16/9',
+                        borderRadius: (peers.length > 0 || !isFullscreen) ? '1.25rem' : '0',
+                        overflow: 'hidden', 
+                        backgroundColor: '#000',
+                        border: (peers.length > 0 || !isFullscreen) ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                        zIndex: 40, 
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: (peers.length > 0 || !isFullscreen) ? '0 25px 50px rgba(0,0,0,0.6)' : 'none'
+                    }}>
                         {/* Camera Off Overlay */}
                         <div style={{
                             position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
