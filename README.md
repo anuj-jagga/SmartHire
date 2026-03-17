@@ -1,9 +1,8 @@
 # SmartHire - Interview & Placement Management System
 
-A full-stack MERN platform for managing recruitment workflows with real-time video interviews, secure authentication, and a premium performance-driven UI.
+⚡ **Built with real-time WebRTC video interviews and production-grade security practices.**
 
-🔗 **Live Demo**: [Coming Soon]  
-📂 **Backend Repo**: [Link to your repo]
+SmartHire is a full-stack MERN platform designed to bridge the gap between application tracking and live interviewing. This project simulates a real-world enterprise recruitment pipeline, focusing on high-performance communication, architectural security, and a premium "wow-factor" user experience.
 
 ---
 
@@ -12,11 +11,15 @@ A full-stack MERN platform for managing recruitment workflows with real-time vid
 ### 👨💻 Candidate Dashboard – Browse Jobs
 ![Candidate Dashboard](./screenshots/candidate-dashboard.png)
 
+<br/>
+
 ### 🧑💼 HR Dashboard – Manage Job Postings
 ![HR Dashboard](./screenshots/hr-dashboard.png)
 
+<br/>
+
 ### 🎥 Real-Time Interview (WebRTC)
-Peer-to-peer video interview with live participant tracking and media controls.
+Peer-to-peer video interviews using WebRTC with STUN/TURN connectivity, live participant tracking, and in-call media controls.
 
 ![Interview Screen](./screenshots/interview.png)
 
@@ -24,7 +27,16 @@ Peer-to-peer video interview with live participant tracking and media controls.
 
 ## 💡 About & Motivation
 
-SmartHire was built to bridge the gap between application tracking and live interviewing. This project simulates a real-world enterprise recruitment pipeline, focusing on security, real-time communication, and a "wow-factor" user experience.
+Built to simulate a real-world hiring pipeline, SmartHire addresses the complexity of peer-to-peer signaling and state management. The goal was to create a recruiter-ready tool that handles the messiness of real-time media while maintaining strict security via HTTP-only protocols.
+
+---
+
+## 🏗️ Architecture
+
+- **Frontend**: React (Vite), Zustand, Axios
+- **Backend**: Node.js, Express REST APIs
+- **Real-time**: Socket.IO (Signaling) + WebRTC (Media Stream)
+- **Database**: MongoDB Atlas (Cloud Managed)
 
 ---
 
@@ -33,34 +45,25 @@ SmartHire was built to bridge the gap between application tracking and live inte
 ### 👤 Role-Based Workflows
 - **Candidate**: Browse jobs, view detailed descriptions, and apply with a single click.
 - **HR Professional**: Post new job openings, manage applicants, and initiate interviews.
-- **Admin**: Monitor system-wide activity feeds and user registrations.
+- **Admin**: Monitor system-wide activity feeds and user registrations in real-time.
 
 ### 🔐 Security & Auth
 - **HTTP-Only Cookies**: JWT tokens are stored in secure cookies to prevent XSS attacks.
 - **Bcrypt**: Industrial-grade password hashing for user data protection.
 - **Protected Routes**: Granular access control for API endpoints and UI views.
 
-### 🎥 Native WebRTC Interviews
+### 🎥 Native WebRTC interviews
 - **Peer-to-Peer**: High-performance real-time video/audio communication.
 - **Draggable PiP**: Custom-built draggable local video preview for a better user experience.
 - **Live Monitoring**: Pulsating status indicators for a professional room atmosphere.
 
 ---
 
-## 🏗️ Architecture
-
-- **Frontend**: React (Vite) + Zustand (State Management) + Axios.
-- **Backend**: Node.js & Express REST APIs.
-- **Real-time**: Socket.IO for WebRTC signaling and live pipeline updates.
-- **Database**: MongoDB Atlas (Cloud Managed Service) for persistent storage.
-
----
-
 ## 🔥 Technical Highlights & Enhancements
 
+- **"Nuclear Cleanup" Logic**: Engineered strict MediaStream track termination and signaling disconnects to prevent browser memory leaks and rogue camera/mic usage—addressing a common real-world WebRTC pitfall.
 - **Cloud Migration**: Successfully migrated the database layer from local MongoDB to **MongoDB Atlas** for production-grade reliability and scalability.
 - **WebRTC Reliability**: Implemented ICE servers (STUN/TURN) to ensure connectivity across restrictive corporate firewalls.
-- **Memory Optimization**: Built "Nuclear Cleanup" logic to handle MediaStream track termination, preventing memory leaks and rogue camera usage.
 - **Observability**: Designed a custom Analytics Engine to log system events and broadcast them to the Admin dashboard in real-time.
 
 ---
@@ -73,7 +76,6 @@ cd backend
 npm install
 npm run dev
 ```
-*Requires a `.env` file with `PORT`, `MONGO_URI`, and `JWT_SECRET`.*
 
 ### 2. Frontend
 ```bash
@@ -91,14 +93,6 @@ To run this project, you will need to add the following variables to your `backe
 `PORT=5000`  
 `MONGO_URI=mongodb+srv://...` (Your MongoDB Atlas URI)  
 `JWT_SECRET=your_jwt_secret`
-
----
-
-## 🧪 Demo Flow
-1. **Register** as a "Candidate" or "HR Professional".
-2. **HR**: Post a job to see it appear in the global feed.
-3. **Candidate**: Apply for the job to trigger a real-time notification.
-4. **Interview**: Join the generated room ID to start a peer-to-peer video call.
 
 ---
 
