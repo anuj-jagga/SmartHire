@@ -36,6 +36,7 @@ Built to simulate a real-world hiring pipeline, SmartHire addresses the complexi
 - **Frontend**: React (Vite), Zustand, Axios
 - **Backend**: Node.js, Express REST APIs
 - **Real-time**: Socket.IO (Signaling) + WebRTC (Media Stream)
+- **Background Tasks**: BullMQ + Redis (Asynchronous Email Queueing)
 - **Database**: MongoDB Atlas (Cloud Managed)
 
 ---
@@ -64,6 +65,7 @@ Built to simulate a real-world hiring pipeline, SmartHire addresses the complexi
 - **"Nuclear Cleanup" Logic**: Engineered strict MediaStream track termination and signaling disconnects to prevent browser memory leaks and rogue camera/mic usage—addressing a common real-world WebRTC pitfall.
 - **Cloud Migration**: Successfully migrated the database layer from local MongoDB to **MongoDB Atlas** for production-grade reliability and scalability.
 - **WebRTC Reliability**: Implemented ICE servers (STUN/TURN) to ensure connectivity across restrictive corporate firewalls.
+- **Distributed Task Queueing**: Implemented a resilient, non-blocking email dispatch system using **BullMQ and Redis**, ensuring high-volume operations don't interfere with the main event loop.
 - **Observability**: Designed a custom Analytics Engine to log system events and broadcast them to the Admin dashboard in real-time.
 
 ---
