@@ -71,15 +71,17 @@ Built to simulate a real-world hiring pipeline, SmartHire addresses the complexi
 ## 🛠️ Installation & Setup
 
 ### 1. Backend
+- Located in: `backend/`
+- Runs on: [http://localhost:5000](http://localhost:5000)
 ```bash
-cd backend
 npm install
 npm run dev
 ```
 
 ### 2. Frontend
+- Located in: `frontend/`
+- Runs on: [http://localhost:5173](http://localhost:5173)
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
@@ -88,11 +90,16 @@ npm run dev
 
 ## 🔑 Environment Variables
 
-To run this project, you will need to add the following variables to your `backend/.env` file:
+Create a `.env` file inside the `backend/` directory:
 
-`PORT=5000`  
-`MONGO_URI=mongodb+srv://...` (Your MongoDB Atlas URI)  
-`JWT_SECRET=your_jwt_secret`
+```env
+PORT=5000
+MONGO_URI=your_mongodb_atlas_uri
+JWT_SECRET=your_jwt_secret
+```
+
+> [!IMPORTANT]
+> Make sure MongoDB Atlas is configured and accessible (whitelist your IP) before running the backend.
 
 ---
 
