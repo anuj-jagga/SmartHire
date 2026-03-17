@@ -99,7 +99,7 @@ JWT_SECRET=your_jwt_secret
 ```
 
 > [!IMPORTANT]
-> Make sure MongoDB Atlas is configured and accessible (whitelist your IP) before running the backend.
+> Make sure MongoDB Atlas is configured and your IP is whitelisted before starting the backend.
 
 ---
 
