@@ -40,7 +40,11 @@ const Dashboard = () => {
     const [analyticsEvents, setAnalyticsEvents] = useState([]);
 
     useEffect(() => {
-        if (!user) {
+        if (!user || user.role === undefined || !['Candidate', 'HR', 'Admin'].includes(user.role)) {
+            if (user) {
+                // If there's a user object but invalid role (e.g. from a different local project)
+                useAuthStore.getState().logout();
+            }
             navigate('/login');
             return;
         }

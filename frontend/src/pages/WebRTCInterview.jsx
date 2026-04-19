@@ -641,7 +641,7 @@ const WebRTCInterview = () => {
                     backdropFilter: 'blur(20px)'
                 }}>
                     <button onClick={toggleMute} style={{ 
-                        width: '48px', height: '48px', borderRadius: '50%', border: 'none', 
+                        width: '48px', height: '48px', borderRadius: '50%', 
                         backgroundColor: isMuted ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.05)', 
                         color: isMuted ? '#ef4444' : 'white', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s',
                         border: isMuted ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid transparent'
@@ -650,7 +650,7 @@ const WebRTCInterview = () => {
                     </button>
                     
                     <button onClick={toggleVideo} style={{ 
-                        width: '48px', height: '48px', borderRadius: '50%', border: 'none', 
+                        width: '48px', height: '48px', borderRadius: '50%', 
                         backgroundColor: isVideoOff ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.05)', 
                         color: isVideoOff ? '#ef4444' : 'white', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s',
                         border: isVideoOff ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid transparent'
@@ -661,7 +661,7 @@ const WebRTCInterview = () => {
                     <div style={{ width: '1px', height: '28px', backgroundColor: 'rgba(255,255,255,0.08)', margin: '0 0.25rem' }}></div>
                     
                     <button onClick={toggleScreenShare} style={{ 
-                        width: '48px', height: '48px', borderRadius: '50%', border: 'none', 
+                        width: '48px', height: '48px', borderRadius: '50%', 
                         backgroundColor: isScreenSharing ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255,255,255,0.05)', 
                         color: isScreenSharing ? '#60a5fa' : 'white', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s',
                         border: isScreenSharing ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid transparent'

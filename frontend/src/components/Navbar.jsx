@@ -30,7 +30,7 @@ const Navbar = () => {
                                     <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-white/10">
                                         <User size={16} className="text-muted" />
                                     </div>
-                                    <span className={`badge badge-role-${user.role.toLowerCase()}`}>{user.role}</span>
+                                    <span className={`badge badge-role-${user?.role?.toLowerCase() || 'default'}`}>{user?.role || 'User'}</span>
                                 </div>
                                 <button onClick={handleLogout} className="btn text-sm py-2 px-4 bg-slate-800/50 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/50 transition-colors border border-transparent rounded-full flex items-center gap-2">
                                     <LogOut size={16} /> Logout
