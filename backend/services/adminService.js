@@ -4,12 +4,10 @@ const Application = require('../models/Application');
 const Analytics = require('../models/Analytics');
 
 const getDashboardStats = async () => {
-    // 1. Total counts
     const totalStudents = await User.countDocuments({ role: 'Candidate' });
     const totalJobs = await Job.countDocuments();
     const selectedCount = await Application.countDocuments({ status: 'Offered' });
 
-    // 2. Department-wise placement stats (grouping by jobTitle or you can join with Job model)
     const placementStats = await Application.aggregate([
         { $match: { status: 'Offered' } },
         { $group: { _id: "$jobTitle", count: { $sum: 1 } } },
@@ -17,14 +15,12 @@ const getDashboardStats = async () => {
         { $sort: { count: -1 } }
     ]);
 
-    // 3. Status Distribution
     const statusDistribution = await Application.aggregate([
         { $group: { _id: "$status", count: { $sum: 1 } } },
         { $project: { status: "$_id", count: 1, _id: 0 } },
         { $sort: { count: -1 } }
     ]);
 
-    // 4. Job-wise selection stats (Applications vs Offered for each Job)
     const jobWiseStats = await Application.aggregate([
         {
             $group: {

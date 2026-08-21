@@ -5,7 +5,6 @@ const sendEmail = async (options) => {
         let transporter;
 
         if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-            // Provide a real configuration for Gmail here
             transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
@@ -14,8 +13,7 @@ const sendEmail = async (options) => {
                 }
             });
         } else {
-            // Fallback for easy testing if no real credentials exist
-            console.log("\n[!] No SMTP_USER in .env. Falling back to Ethereal Testing...");
+            console.log("\n[!] No SMTP credentials in .env. Using Ethereal test account...");
             const testAccount = await nodemailer.createTestAccount();
 
             transporter = nodemailer.createTransport({
@@ -30,7 +28,7 @@ const sendEmail = async (options) => {
         }
 
         const mailOptions = {
-            from: process.env.SMTP_USER ? `"SmartHire HR" <${process.env.SMTP_USER}>` : '"SmartHire Test System" <hr@smarthire.test>',
+            from: process.env.SMTP_USER ? `"SmartHire HR" <${process.env.SMTP_USER}>` : '"SmartHire HR" <hr@smarthire.local>',
             to: options.to,
             subject: options.subject,
             html: options.html
@@ -38,16 +36,11 @@ const sendEmail = async (options) => {
 
         const info = await transporter.sendMail(mailOptions);
 
-        console.log("=======================================");
-        console.log("Email sent successfully: %s", info.messageId);
-
         if (!process.env.SMTP_USER) {
-            console.log("Ethereal Testing - Click the URL to View Email Preview in Browser:");
             const previewUrl = nodemailer.getTestMessageUrl(info);
-            console.log(previewUrl);
+            console.log("Email Preview URL:", previewUrl);
             info.previewUrl = previewUrl;
         }
-        console.log("=======================================\n");
 
         return info;
     } catch (error) {

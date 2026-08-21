@@ -1,109 +1,57 @@
-# SmartHire - Interview & Placement Management System
+# SmartHire
 
-⚡ **Built with real-time WebRTC video interviews and production-grade security practices.**
+A recruitment and interview web app built with React, Node.js, Express, and MongoDB. It includes role-based access for Candidates, HR, and Admins, live 1-on-1 video interviews using WebRTC, and background email processing with BullMQ and Redis.
 
-SmartHire is a full-stack MERN platform designed to bridge the gap between application tracking and live interviewing. This project simulates a real-world enterprise recruitment pipeline, focusing on high-performance communication, architectural security, and a premium "wow-factor" user experience.
+## Features
 
----
+- **Candidate Portal**: Browse job listings, apply with resume uploads, and join video interview rooms.
+- **HR Portal**: Post jobs, review applicants, download resumes, and generate interview links.
+- **Admin Dashboard**: Overview of platform activity and application metrics.
+- **Video Interviews**: Real-time peer-to-peer video calls using WebRTC and Socket.IO for signaling.
+- **Background Tasks**: Asynchronous email notifications handled via BullMQ and Redis.
+- **Authentication**: JWT authentication with bcrypt password hashing and protected routes.
 
-## 📸 Screenshots
+## Tech Stack
 
-### 👨💻 Candidate Dashboard – Browse Jobs
-![Candidate Dashboard](./screenshots/candidate-dashboard.png)
+- **Frontend**: React (Vite), Zustand, Socket.IO Client
+- **Backend**: Node.js, Express.js, Socket.IO, Multer
+- **Database**: MongoDB (Mongoose)
+- **Queue**: BullMQ, Redis
 
-<br/>
+## Setup & Local Development
 
-### 🧑💼 HR Dashboard – Manage Job Postings
-![HR Dashboard](./screenshots/hr-dashboard.png)
+### 1. Install dependencies
 
-<br/>
-
-### 🎥 Real-Time Interview (WebRTC)
-Peer-to-peer video interviews using WebRTC with STUN/TURN connectivity, live participant tracking, and in-call media controls.
-
-![Interview Screen](./screenshots/interview.png)
-
----
-
-## 💡 About & Motivation
-
-Built to simulate a real-world hiring pipeline, SmartHire addresses the complexity of peer-to-peer signaling and state management. The goal was to create a recruiter-ready tool that handles the messiness of real-time media while maintaining strict security via HTTP-only protocols.
-
----
-
-## 🏗️ Architecture
-
-- **Frontend**: React (Vite), Zustand, Axios
-- **Backend**: Node.js, Express REST APIs
-- **Real-time**: Socket.IO (Signaling) + WebRTC (Media Stream)
-- **Background Tasks**: BullMQ + Redis (Asynchronous Email Queueing)
-- **Database**: MongoDB Atlas (Cloud Managed)
-
----
-
-## 🚀 Key Features
-
-### 👤 Role-Based Workflows
-- **Candidate**: Browse jobs, view detailed descriptions, and apply with a single click.
-- **HR Professional**: Post new job openings, manage applicants, and initiate interviews.
-- **Admin**: Monitor system-wide activity feeds and user registrations in real-time.
-
-### 🔐 Security & Auth
-- **HTTP-Only Cookies**: JWT tokens are stored in secure cookies to prevent XSS attacks.
-- **Bcrypt**: Industrial-grade password hashing for user data protection.
-- **Protected Routes**: Granular access control for API endpoints and UI views.
-
-### 🎥 Native WebRTC interviews
-- **Peer-to-Peer**: High-performance real-time video/audio communication.
-- **Draggable PiP**: Custom-built draggable local video preview for a better user experience.
-- **Live Monitoring**: Pulsating status indicators for a professional room atmosphere.
-
----
-
-## 🔥 Technical Highlights & Enhancements
-
-- **"Nuclear Cleanup" Logic**: Engineered strict MediaStream track termination and signaling disconnects to prevent browser memory leaks and rogue camera/mic usage—addressing a common real-world WebRTC pitfall.
-- **Cloud Migration**: Successfully migrated the database layer from local MongoDB to **MongoDB Atlas** for production-grade reliability and scalability.
-- **WebRTC Reliability**: Implemented ICE servers (STUN/TURN) to ensure connectivity across restrictive corporate firewalls.
-- **Distributed Task Queueing**: Implemented a resilient, non-blocking email dispatch system using **BullMQ and Redis**, ensuring high-volume operations don't interfere with the main event loop.
-- **Observability**: Designed a custom Analytics Engine to log system events and broadcast them to the Admin dashboard in real-time.
-
----
-
-## 🛠️ Installation & Setup
-
-### 1. Backend
-- Located in: `backend/`
-- Runs on: [http://localhost:5000](http://localhost:5000)
 ```bash
+# Install backend packages
+cd backend
 npm install
-npm run dev
+
+# Install frontend packages
+cd ../frontend
+npm install
 ```
 
-### 2. Frontend
-- Located in: `frontend/`
-- Runs on: [http://localhost:5173](http://localhost:5173)
-```bash
-npm install
-npm run dev
-```
+### 2. Configure Environment
 
----
-
-## 🔑 Environment Variables
-
-Create a `.env` file inside the `backend/` directory:
+Create a `.env` file inside the `backend` folder:
 
 ```env
 PORT=5000
-MONGO_URI=your_mongodb_atlas_uri
+MONGO_URI=mongodb://127.0.0.1:27017/smarthire
 JWT_SECRET=your_jwt_secret
 ```
 
-> [!IMPORTANT]
-> Make sure MongoDB Atlas is configured and your IP is whitelisted before starting the backend.
+### 3. Start the project
 
----
+Make sure MongoDB and Redis are running locally, then start both servers:
 
-## 📄 License
-MIT
+```bash
+# Start backend (http://localhost:5000)
+cd backend
+npm run dev
+
+# In another terminal, start frontend (http://localhost:5173)
+cd frontend
+npm run dev
+```

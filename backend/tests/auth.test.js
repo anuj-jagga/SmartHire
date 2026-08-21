@@ -6,14 +6,12 @@ const User = require('../models/User');
 
 let mongoServer;
 
-// Start the memory server before all tests
 beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
 });
 
-// Clear all collections after each test
 afterEach(async () => {
     const collections = mongoose.connection.collections;
     for (const key in collections) {
@@ -21,7 +19,6 @@ afterEach(async () => {
     }
 });
 
-// Drop the database and close the connection after all tests
 afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
@@ -39,21 +36,17 @@ describe('Auth API Integration Tests', () => {
                 role: 'HR'
             });
 
-        if (res.statusCode !== 201) require('fs').writeFileSync('err.log', JSON.stringify(res.body));
-
         expect(res.statusCode).toBe(201);
         expect(res.body).toHaveProperty('token');
         expect(res.body).toHaveProperty('email', 'test@hr.com');
         expect(res.body).toHaveProperty('role', 'HR');
 
-        // Verify the user was created in the database
         const userInDb = await User.findOne({ email: 'test@hr.com' });
         expect(userInDb).toBeTruthy();
         expect(userInDb.name).toBe('Test HR');
     });
 
     it('should login an existing user', async () => {
-        // Create user first
         await request(app)
             .post('/api/auth/register')
             .send({
@@ -63,7 +56,6 @@ describe('Auth API Integration Tests', () => {
                 role: 'Candidate'
             });
 
-        // Now attempt to login
         const res = await request(app)
             .post('/api/auth/login')
             .send({

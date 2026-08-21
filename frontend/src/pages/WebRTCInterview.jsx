@@ -112,10 +112,8 @@ const WebRTCInterview = () => {
                 return;
             }
             
-            // Register tracks for nuclear cleanup
             currentStream.getTracks().forEach(track => {
                 tracksRegistryRef.current.push(track);
-                console.log(`Registered local track: ${track.kind}`);
             });
 
             setStream(currentStream);
@@ -199,27 +197,23 @@ const WebRTCInterview = () => {
     }, [roomId, roomValidating, roomError, user]);
 
     const destroyInterview = () => {
-        console.log("NUCLEAR CLEANUP STARTING...");
-        
-        // 1. Terminate all socket activity
         if (socketRef.current) {
             socketRef.current.disconnect();
             socketRef.current = null;
         }
 
-        // 2. Stop EVERY track in the registry
+        // Stop all media tracks
         tracksRegistryRef.current.forEach(track => {
             try {
                 track.stop();
                 track.enabled = false;
-                console.log(`Successfully stopped registry track: ${track.kind}`);
             } catch (e) {
-                console.warn("Error stopping track during nuclear cleanup", e);
+                console.warn("Error stopping track", e);
             }
         });
         tracksRegistryRef.current = [];
 
-        // 3. Close all peer connections
+        // Close peer connections
         Object.values(peersRef.current).forEach(pc => {
             try {
                 pc.getSenders().forEach(sender => pc.removeTrack(sender));
@@ -228,10 +222,8 @@ const WebRTCInterview = () => {
         });
         peersRef.current = {};
 
-        // 4. Force detach video elements
         if (userVideo.current) userVideo.current.srcObject = null;
 
-        // 5. Cleanup streams if they still exist
         if (localStreamRef.current) {
             localStreamRef.current.getTracks().forEach(t => t.stop());
             localStreamRef.current = null;

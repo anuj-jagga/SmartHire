@@ -23,7 +23,7 @@ const CandidateDashboard = ({
     const [activeTab, setActiveTab] = useState('available');
     const [selectedApp, setSelectedApp] = useState(null);
 
-    // Elite Search Suite State
+    // Search & Filter State
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [localSearch, setLocalSearch] = useState(searchQuery);
     const [localLocation, setLocalLocation] = useState(locationFilter);
